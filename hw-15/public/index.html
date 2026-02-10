@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HW-15 Chat</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; }
+    .wrap { max-width: 640px; }
+    #messages { border: 1px solid #ccc; padding: 12px; min-height: 180px; border-radius: 8px; }
+    .row { display: flex; gap: 8px; margin-top: 12px; }
+    input { flex: 1; padding: 10px; }
+    button { padding: 10px 14px; cursor: pointer; }
+    .msg { margin: 6px 0; }
+    .ok { color: rgb(0, 170, 26); }
+    .sys { color: #555; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Simple Chat (HW-15)</h1>
+
+    <div id="messages">
+      <div class="msg sys">Waiting for messages…</div>
+    </div>
+
+    <div class="row">
+      <input id="messageInput" type="text" placeholder="Type a message..." />
+      <button id="sendBtn">Send Message</button>
+    </div>
+  </div>
+
+  <!-- Socket.io client is served by the server -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    const input = document.getElementById('messageInput');
+    const btn = document.getElementById('sendBtn');
+    const messages = document.getElementById('messages');
+
+    function addLine(text, cls) {
+      const div = document.createElement('div');
+      div.className = 'msg ' + (cls || '');
+      div.textContent = text;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    socket.on('connect', () => {
+      addLine('Connected: ' + socket.id, 'sys');
+    });
+
+    socket.on('disconnect', () => {
+      addLine('Disconnected', 'sys');
+    });
+
+    btn.addEventListener('click', () => {
+      const text = input.value.trim();
+      if (!text) return;
+
+      socket.emit('chat_message', text);
+      addLine('You sent: ' + text, 'sys');
+      input.value = '';
+      input.focus();
+    });
+
+    // confirmation from server
+    socket.on('message_received', (payload) => {
+      addLine('Server confirmed: "' + payload.text + '" at ' + payload.at, 'ok');
+    });
+
+    // allow Enter key
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') btn.click();
+    });
+  </script>
+</body>
+</html>

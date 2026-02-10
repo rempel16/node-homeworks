@@ -1,0 +1,12 @@
+{
+  "name": "hw22",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "ts-node main.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
